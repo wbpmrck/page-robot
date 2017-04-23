@@ -1,0 +1,25 @@
+{
+  "name": "page-robot",
+  "version": "1.0.0",
+  "description": "a page automation framework based on phantomjs.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wbpmrck/page-robot.git"
+  },
+  "keywords": [
+    "automation"
+  ],
+  "author": "kaicui",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/wbpmrck/page-robot/issues"
+  },
+  "homepage": "https://github.com/wbpmrck/page-robot#readme",
+  "dependencies": {
+    "nightmare": "^2.10.0"
+  }
+}
