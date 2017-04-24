@@ -4,6 +4,10 @@ one page automation framework,base on Phantomjs.
 # how to install
 
 
+# how to run
+
+goto `./run` directory,and execute
+
 
 # program structure
 

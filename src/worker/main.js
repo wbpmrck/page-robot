@@ -25,7 +25,7 @@ process.on('exit', (code) => {
 });
 
 
-logger.info("启动 subproc");
+logger.info(`启动 subproc,argv is:${process.argv}`);
 
 /* ---------------------------------
  启动入口文件：
@@ -33,7 +33,10 @@ logger.info("启动 subproc");
  
  {cws:__dirname}是options,使得这个子进程的工作目录在当前目录开始寻址
  ---------------------------------*/
-var subProc = spawn("node",["entry.js","1234"],{cwd:path.join(__dirname,"/scripts/plugins/","act-01")});
+// var subProc = spawn("node",["entry.js","1234"],{cwd:path.join(__dirname,"/scripts/plugins/",`act-${process.argv[2]}`)});
+
+//todo:通过node进程去调用pm2,主要是方便动态的传入一些运行时才可以决定的参数
+var subProc = spawn("pm2",["start","pm2.config.js"],{cwd:path.join(__dirname,"/scripts/plugins/",`act-${process.argv[2]}`)});
 
 
 

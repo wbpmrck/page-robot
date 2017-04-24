@@ -8,9 +8,7 @@ var Nightmare = require('nightmare');
 var nightmare = Nightmare({ show: true })
 
 
-logger.info("启动 worker");
-
-
+logger.info("启动 国务院活动插件");
 
 /* ---------------------------------
  错误处理
@@ -30,6 +28,7 @@ process.on('exit', (code) => {
 
 var instance = nightmare
     .goto('https://www.baidu.com/');
+
 instance.type('#kw', '崔凯')
     .type('body', '\u000d')
     .wait('.result')
@@ -39,16 +38,14 @@ instance.type('#kw', '崔凯')
     })
     // .end()
     .then(function (result) {
-        console.log(result)
+        console.log(`result is:${result}`);
+    
+        console.log("prepare to end...")
+        instance.end(() => "plugin process end...")
+        //prints "some value"
+            .then((value) => console.log(value));
     })
     .catch(function (error) {
         console.error('Search failed:', error);
     });
-
-setTimeout(()=>{
-    console.log("prepare to end...")
-    instance.end(() => "plugin process end...")
-    //prints "some value"
-        .then((value) => console.log(value));
-},3000)
 
