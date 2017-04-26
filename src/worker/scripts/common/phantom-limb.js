@@ -290,8 +290,8 @@
 	function phantomClick(e) {
 		if (e.synthetic) return;
 
-		e.preventDefault();
-		e.stopPropagation();
+		// e.preventDefault();
+		// e.stopPropagation();
 	}
 
 	// Not entirely proud of this, but I can't serve CSS from GitHub

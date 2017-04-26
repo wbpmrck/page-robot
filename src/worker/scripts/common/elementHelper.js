@@ -4,6 +4,11 @@
 window.__nightmare = {};
 __nightmare.ipc = require('electron').ipcRenderer;
 
+String.prototype.replaceAll = function(search, replacement) {
+    var target = this;
+    return target.replace(new RegExp(search, 'g'), replacement);
+};
+
 window.ElementHelper={
     //获取指定元素的位置信息
     getPosition: function (ele) {
