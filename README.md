@@ -25,3 +25,12 @@ goto `./run` directory,and execute
     * 日志库，用于记录日志
 * src/run:
     * 存放常用的各种启动脚本
+
+
+# docs
+the framework use some 3rd-party library,and has encountered many problems of these libs.
+so docs are needed.
+
+ - nightmare-examples:
+
+    > this directory container useful docs/demos for nightmare test framework.

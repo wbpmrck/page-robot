@@ -1,0 +1,26 @@
+{
+  "name": "nightmare-examples",
+  "version": "0.3.3",
+  "description": "Examples for common Nightmare usage",
+  "author": {
+    "name": "Ross Hinkley",
+    "email": "rosshinkley@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rosshinkley/nightmare-examples"
+  },
+  "keywords": [
+    "nightmare"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "chai": "^3.5.0",
+    "co": "^4.6.0",
+    "express": "^4.13.4",
+    "mocha-generators": "^1.2.0",
+    "nightmare": "^2.5.0",
+    "serve-static": "^1.10.2",
+    "vo": "^3.0.4"
+  }
+}
