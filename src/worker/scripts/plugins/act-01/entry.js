@@ -10,8 +10,9 @@ var _ = require("../../common/gesture-nightmare");
 var path = require("path");
 var nightmare = Nightmare({
     show: true ,
+    typeInterval:300,
     height: 720,
-    width:390,
+    width:690,
     webPreferences: {
         preload: path.resolve("../../common/elementHelper.js")
         // preload: path.resolve("../../common/touch-inject.js")
@@ -101,7 +102,10 @@ var run = function*() {
                 .tap(".mugine_class_843")
                 .wait(".mugine_class_1039")
                 .wait(2000)
-                .type(".mugine_class_1041","13800000000")
+                .focus(".mugine_class_1041")
+                .wait(1000)
+                .type(".mugine_class_1041","13865803583")
+                .keydown(27); //结束phantom-limb模式
         }
     }
 };

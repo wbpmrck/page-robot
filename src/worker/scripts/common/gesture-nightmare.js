@@ -74,3 +74,25 @@ Nightmare.action('tap', function (selector,done) {
         },40);
     }, done, selector);
 });
+Nightmare.action('focus', function (selector,done) {
+    this.evaluate_now(function (selector) {
+        var element = document.querySelector(selector);
+        if(element) {
+            element.focus()
+        }
+    }, done, selector);
+});
+Nightmare.action('blur', function (selector,done) {
+    this.evaluate_now(function (selector) {
+        var element = document.querySelector(selector);
+        if(element) {
+            element.blur()
+        }
+    }, done, selector);
+});
+
+Nightmare.action('keydown', function (keyCode,done) {
+    this.evaluate_now(function (keyCode) {
+        ElementHelper.keydown(keyCode);
+    }, done, keyCode);
+});
