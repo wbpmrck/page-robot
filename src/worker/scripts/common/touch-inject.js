@@ -1,3 +1,4 @@
+//todo:这个库模拟的比较残，不用了
 window.__nightmare = {};
 __nightmare.ipc = require('electron').ipcRenderer;
 

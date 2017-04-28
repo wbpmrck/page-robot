@@ -10,11 +10,11 @@ var _ = require("../../common/gesture-nightmare");
 var path = require("path");
 var nightmare = Nightmare({
     show: true ,
-    typeInterval:300,
+    typeInterval:100,
     height: 720,
     width:690,
     webPreferences: {
-        preload: path.resolve("../../common/elementHelper.js")
+        preload: path.resolve(__dirname,"../../common/elementHelper.js")
         // preload: path.resolve("../../common/touch-inject.js")
         // preload: path.resolve("../../common/phantom-limb.js")
         //alternative: preload: "absolute/path/to/custom-script.js"
@@ -22,6 +22,8 @@ var nightmare = Nightmare({
 });
 
 var topicsData = require("./topics.data");
+var coUtils = require("../../../../utils/co-utils"),
+    sleep=  coUtils.sleep;
 
 
 
@@ -31,15 +33,15 @@ logger.info("启动 国务院活动插件");
  错误处理
  ---------------------------------*/
 process.on('uncaughtException', (err) => {
-    console.error(`worker Caught exception: ${err}`);
+    console.error(`entry Caught exception: ${err}`);
 });
 
 process.on('SIGHUP', () => {
-    console.log('worker Received SIGHUP.');
+    console.log('entry Received SIGHUP.');
 });
 
 process.on('exit', (code) => {
-    console.log(`worker About to exit with code: ${code}`);
+    console.log(`entry About to exit with code: ${code}`);
 });
 
 /*  --------------------------
@@ -52,119 +54,147 @@ var ua = "Mozilla/5.0 (Linux; Android 7.0; MHA-AL00 Build/HUAWEIMHA-AL00; wv) Ap
 
 
 
-var run = function*() {
-    yield nightmare
-        .useragent(ua)
-        .goto(entryPageUrl)
+var run = function*(activityId,phoneNumber,fileDir) {
+
+    try {
+        var subjectIndex=1;
+        //打开页面，进入 答题主流程。直到验证码填写步骤
+        let result = yield function*() {
+            yield nightmare
+                .useragent(ua)
+                .goto(entryPageUrl)
+            
+                .wait('.mugine_class_981')
+                .inject("js",path.resolve(__dirname,"../../common/phantom-limb.js")) //加载js库，用于辅助模拟手势
+                .wait(3000)
+            
+                .tap('.mugine_class_981 .curve_render path') //开始答题
+            
+                .wait(3000)
+                .wait('.mugine_class_985')
+                .tap(".mugine_class_985") //点击关闭提示
+                .wait('.mugine_class_989') //看到"政府报告知多少"
+            ;
         
-        .wait('.mugine_class_981')
-        .inject("js",path.resolve("../../common/phantom-limb.js")) //加载js库，用于辅助模拟手势
-        .wait(3000)
-        
-        .tap('.mugine_class_981 .curve_render path') //开始答题
-        
-        .wait(3000)
-        .wait('.mugine_class_985')
-        .tap(".mugine_class_985") //点击关闭提示
-        .wait('.mugine_class_989') //看到"政府报告知多少"
-        ;
+            for(;subjectIndex<=10;subjectIndex++){
+                logger.info(`开始做第${subjectIndex}题--->`);
+                let title = yield nightmare
+                    .wait(800)
+                    //获取题干
+                    .evaluate(function () {
+                        let stage = document.getElementsByClassName("mugine_class_0")[0];
+                        let size = stage.getBoundingClientRect();
+                        let dom=  document.elementFromPoint(parseInt( (size.right-size.left)/2), parseInt( (size.bottom-size.top)/2 -50));
+                        return dom.innerText;
+                    });
+                //处理其他字符
+                title = title.replaceAll("）","").replaceAll("（","").replaceAll(" ","").replace(/&nbsp;/g, "'").replace(/\s+/g, "");
+                logger.debug("title="+title);
+                let answerBtn = topicsData.find(title);
+                logger.debug("answer ="+answerBtn);
+                if(answerBtn){
+                    //点击答案
+                    yield nightmare
+                        .wait(1000)
+                        .tap(answerBtn)
+                        .wait(1000)
+                        .tap(".mugine_class_841");
+                }else{
+                    logger.error("题目没找到答案!")
+                    break;
+                }
+                if(subjectIndex==10){
+                    logger.info("准备输入手机号!")
+                    yield nightmare
+                        .tap(".mugine_class_843")
+                        .wait(".mugine_class_1039")
+                        .wait(2000)
+                        .focus(".mugine_class_1041")
+                        .wait(1000)
+                        .type(".mugine_class_1041",phoneNumber)
     
-    for(var i=1;i<=10;i++){
-        console.log(`开始做第${i}题--->`);
-        let title = yield nightmare
-            .wait(1500)
-            //获取题干
-            .evaluate(function () {
-                let stage = document.getElementsByClassName("mugine_class_0")[0];
-                let size = stage.getBoundingClientRect();
-                let dom=  document.elementFromPoint(parseInt( (size.right-size.left)/2), parseInt( (size.bottom-size.top)/2 -50));
-                return dom.innerText;
-            });
-        //处理其他字符
-        title = title.replaceAll("）","").replaceAll("（","").replaceAll(" ","").replace(/&nbsp;/g, "'").replace(/\s+/g, "");
-        console.log("title="+title);
-        let answerBtn = topicsData.find(title);
-        console.log("answer ="+answerBtn);
-        if(answerBtn){
-            //点击答案
-            yield nightmare
-                .wait(1500)
-                .tap(answerBtn)
-                .wait(1500)
-                .tap(".mugine_class_841");
-        }else{
-            console.log("题目没找到答案!")
-            break;
+                        .focus(".mugine_class_1045")//结束phantom-limb模式，方便人工手动纠正问题
+                        .wait(500)
+                        .keypress(27);
+                    break;
+                }
+            }
+            return `${subjectIndex}/10 的题目已经答完！`;
+        };
+        logger.info("答题主流程,返回结果: %s",result);
+        //todo:这里需要把验证码发送到外部系统，然后监听回发的结果
+        //验证码截图
+        let clientRect = yield nightmare.getRect(".mugine_class_1043");
+        logger.info("获取到验证码区域为: %s",JSON.stringify(clientRect));
+        let pngDir = path.join(fileDir,"/validCode.png");
+        logger.info("准备验证码截图到: %s",pngDir);
+        yield nightmare.screenshot(pngDir,clientRect);
+        
+    
+        let validResult = ""; //获取到的验证码
+        let validCodeWaitStart = new Date();//开始等验证码输入的时间(方便监控看出验证码过期情况)
+        let dotCount = 1;
+    
+    
+        //模拟从远端获取验证码
+        setTimeout(function () {
+            logger.info("模拟15s从远端获取到1个验证码");
+            validResult="1234";
+            // validResult = yield co.wrap(function *(valideCode) {
+            //     yield nightmare
+            //         .focus(".mugine_class_1042")
+            //         .wait(1000)
+            //         .type(".mugine_class_1042",valideCode)
+            //
+            //         .focus(".mugine_class_1045")//结束phantom-limb模式，方便人工手动纠正问题
+            //         .wait(500)
+            //         .keypress(27);
+            //
+            //     logger.info(`验证码${valideCode}输入完毕`);
+            //     return true;
+            //
+            // })("1234");
+        },15000);
+        
+        //等待验证码输入完毕
+        while(!validResult){
+            logger.info(`等待输入验证码${new Array(dotCount=++dotCount%8).join(".")},已经等待了${(new Date()-validCodeWaitStart) /1000}秒`);
+            yield sleep(3000);
         }
-        if(i==10){
-            console.log("准备输入手机号!")
-            yield nightmare
-                .tap(".mugine_class_843")
-                .wait(".mugine_class_1039")
-                .wait(2000)
-                .focus(".mugine_class_1041")
-                .wait(1000)
-                .type(".mugine_class_1041","13865803583")
-                .keydown(27); //结束phantom-limb模式
-        }
+        yield nightmare
+            .focus(".mugine_class_1042")
+            .wait(1000)
+            .type(".mugine_class_1042",validResult);
+
+        logger.info(`验证码${validResult}输入完毕`);
+        // yield nightmare.end();
+        
+    }catch (e){
+        logger.error("出现错误:%s",e);
     }
 };
 
-//use `co` to execute the generator function
-co(run)
-    .then(function(result) {
-        console.log(result);
-    }, function(err) {
-        console.log(err);
-    });
+module.exports={
+    /**
+     * worker通过调用这个方法加载插件执行
+     * @param activityId:活动id
+     * @param phoneNumber:手机号
+     * @param onFinish:结束的回调 fn(bool,result)
+     */
+    main:function (activityId,phoneNumber,fileDir,onFinish) {
+        //use `co` to execute the generator function
+        co.wrap(run)(activityId,phoneNumber,fileDir).then(function(result) {
+            logger.info("插件运行结束，输出结果:"+result);
+            onFinish && onFinish(true,result);
+        }, function(err) {
+            logger.error(err);
+            onFinish && onFinish(false,err);
+        });
+    }
+}
 
 
-// var instance = nightmare
-//     .useragent(ua)
-//     // .goto('http://h5video.adsring.cn/home/index/?_c=H5_jd&_p=prod_h5#/shop')
-//     .goto(entryPageUrl)
-//     ;
-//
-//
-// instance
-//     .wait('.mugine_class_981')
-//     .inject("js",path.resolve("../../common/phantom-limb.js"))
-//     .wait(3000)
-//     // .evaluate(function () {
-//     //     let dom= $('.mugine_class_981 .curve_render path')[0];
-//     //     dom.addEventListener("touchstart",function (evt) {
-//     //         console.log("haha,i got:touchstart \r\n ----------- \r\n");
-//     //         // _showEvt(evt,"haha");
-//     //     });
-//     //     dom.addEventListener("touchend",function (evt) {
-//     //         console.log("haha,i got:touchend \r\n ----------- \r\n");
-//     //         // _showEvt(evt,"haha");
-//     //     })
-//     // })
-//     .tap('.mugine_class_981 .curve_render path') //开始答题
-//
-//     .wait(3000)
-//     .wait('.mugine_class_985')
-//     .tap(".mugine_class_985") //点击关闭提示
-//     .wait('.mugine_class_989') //看到"政府报告知多少"
-//
-//     //获取第一题题干
-//     .evaluate(function () {
-//         let dom= $('.mugeda_render_object.mugine_class_82.mugine_class_83 div')[0];
-//         return dom.innerText;
-//     });
-//
-//
-//
-// //开始执行：then内部会调用nightmare.run 运行 queue 的任务
-// instance.then(function (result) {
-//         console.log(`result is:${result}`);
-//
-//         // console.log("prepare to end...")
-//         // instance.end(() => "plugin process end...")
-//         //     .then((value) => console.log(value));
-//     })
-//     .catch(function (error) {
-//         console.error('entry.js: failed:', error);
-//     });
+
+
+
 

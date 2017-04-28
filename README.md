@@ -25,6 +25,8 @@ goto `./run` directory,and execute
     * 日志库，用于记录日志
 * src/run:
     * 存放常用的各种启动脚本
+* data[recordId]:
+    * 每个活动参与记录下保存的临时文件信息
 
 
 # docs

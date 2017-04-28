@@ -181,7 +181,7 @@ module.exports= {
         var _s = subject.substr(0,12);
         var _topic = this.topics.filter((item)=>{
             item.topic = item.topic.replaceAll("）","").replaceAll("（","").replaceAll(" ","").replace(/&nbsp;/g, "'").replace(/\s+/g, "");
-            console.log(`index of [${_s}] in [${item.topic}] is:[${item.topic.indexOf(_s)}]`);
+            // console.log(`index of [${_s}] in [${item.topic}] is:[${item.topic.indexOf(_s)}]`);
             return item.topic.indexOf(_s)>-1
         });
         if(_topic && _topic.length>0){
