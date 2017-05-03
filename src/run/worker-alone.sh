@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 echo "准备直接启动worker:"
-echo "call this bash file with activity No,for example: ./worker-alone.sh 12345 01 13865803583"
+echo "call this bash file with activity No,for example: ./worker-alone.sh workerid_123 record_123 12345 01 13865803583"
 
 export NODE_DEBUG=debug,info,error
 

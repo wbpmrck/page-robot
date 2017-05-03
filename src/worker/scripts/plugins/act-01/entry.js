@@ -124,7 +124,9 @@ var run = function*(activityId,phoneNumber,fileDir) {
         logger.info("答题主流程,返回结果: %s",result);
         //todo:这里需要把验证码发送到外部系统，然后监听回发的结果
         //验证码截图
-        let clientRect = yield nightmare.getRect(".mugine_class_1043");
+        let clientRect = yield nightmare
+            .wait(1000)
+            .getRect(".mugine_class_1043");
         logger.info("获取到验证码区域为: %s",JSON.stringify(clientRect));
         let pngDir = path.join(fileDir,"/validCode.png");
         logger.info("准备验证码截图到: %s",pngDir);

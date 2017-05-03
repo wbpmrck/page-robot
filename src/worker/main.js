@@ -27,10 +27,10 @@ process.on('exit', (code) => {
 
 
 logger.info(`启动 worker,argv is:${process.argv}`);
-var [,,activityRecordId,activityId,pluginType,phoneNumber ]= process.argv;
+var [,,id,activityRecordId,activityId,pluginType,phoneNumber ]= process.argv;
 
 // logger.info(`活动编号:[${activityId}],插件类型:[${pluginType}],手机号:${phoneNumber}`);
-logger.info(`活动编号:[${activityId}],记录编号:[${activityRecordId}],插件类型:[${pluginType}],手机号:${phoneNumber}`);
+logger.info(`worker id:[${id}],活动编号:[${activityId}],记录编号:[${activityRecordId}],插件类型:[${pluginType}],手机号:${phoneNumber}`);
 
 var tempDataDir = path.resolve(__dirname,"../../data",activityRecordId);
 

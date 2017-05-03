@@ -13,6 +13,18 @@ goto `./run` directory,and execute
 
 * src/scheduler:
     * 调度程序，负责启动worker,并负责对外界的通信
+        * controllers:
+            * 放所有http的controller
+        * framework:
+            * scheduler的底层设施
+        * interceptors:
+            * 拦截器
+        * routes:
+            * 路由设置
+        * store:
+            * 存放scheduler内存中保存的信息，主要是worker的状态，还有等待处理的验证码信息
+        * views:
+            * scheduler作为web服务，也提供页面展示功能，html可以放在里面
 * src/worker:
     * 工作程序，负责启动phantomjs进程，进行实际的工作
 * src/worker/scripts/plugins:
