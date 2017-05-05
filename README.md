@@ -1,5 +1,5 @@
 # page-robot
-one page automation framework,base on Phantomjs.
+one page automation framework,base on [nightmare](http://nightmarejs.org/) and [Electron](http://electron.atom.io/).
 
 # how to install
 
