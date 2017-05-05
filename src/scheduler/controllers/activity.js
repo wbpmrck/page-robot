@@ -19,7 +19,7 @@ map.set(
             //通过pm2启动一个worker,并在内存中保留其信息
             let w = worker.bootWorker(activityRecordId,activityId,pluginType,phoneNumber);
             
-            ctx.body = {workerId:w?w.id:""};
+            ctx.body = resp.success({data: {workerId:w?w.id:""}});
 
         }catch (e){
             resp.failed({desc:e.stack},ctx);
