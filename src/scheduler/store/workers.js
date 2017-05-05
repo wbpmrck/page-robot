@@ -17,6 +17,17 @@ module.exports = {
     workers:{},
     
     /**
+     * 释放worker数据
+     * @param workerId
+     */
+    workerDispose(workerId){
+    
+        if(this.workers[workerId]){
+            delete this.workers[workerId];
+        }
+    },
+    
+    /**
      *  创建一个Worker
      * @param activityRecordId:活动参与编号,其作为worker的id,不能重复使用
      * @param activityId:活动id
@@ -50,10 +61,12 @@ module.exports = {
             //子进程的关闭
             subProc.on('close', (code) => {
                 logger.info(`worker.close:child process exited with code ${code}`);
+                this.workerDispose(id);
             });
             //子进程 启动出错
             subProc.on('error', (err) => {
                 logger.error(`worker.error: ${err}`);
+                this.workerDispose(id);
             });
             //写入数据集合
             let w = new Worker(id,subProc);
@@ -70,6 +83,7 @@ module.exports = {
      * @returns {boolean} :是否注册成功
      */
     regWorker:function (id, wsClient) {
+        logger.info(`准备 regWorker，id=${id} clientId=${wsClient.id}`);
         let worker = this.workers[id];
         if(worker){
             worker.ws = wsClient;

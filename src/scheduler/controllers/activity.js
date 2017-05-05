@@ -16,7 +16,7 @@ map.set(
         try{
             let {activityRecordId,activityId,pluginType,phoneNumber}=ctx.request.body;
             
-            //todo:通过pm2启动一个worker,并在内存中保留其信息
+            //通过pm2启动一个worker,并在内存中保留其信息
             let w = worker.bootWorker(activityRecordId,activityId,pluginType,phoneNumber);
             
             ctx.body = {workerId:w?w.id:""};

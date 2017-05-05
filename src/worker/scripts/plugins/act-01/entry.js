@@ -4,6 +4,11 @@
  */
 
 const logger = require('../../../../log/logger');
+const wsClient = require("../../../wsClient");
+var {clientRole,respCodes,msg} = require("../../../../scheduler/websocket/consts");
+const dateFormat = require('dateformat');
+const fs = require("fs");
+
 var Nightmare = require('nightmare');
 var  co = require('co');
 var _ = require("../../common/gesture-nightmare");
@@ -90,6 +95,10 @@ var run = function*(activityId,phoneNumber,fileDir) {
                 //处理其他字符
                 title = title.replaceAll("）","").replaceAll("（","").replaceAll(" ","").replace(/&nbsp;/g, "'").replace(/\s+/g, "");
                 logger.debug("title="+title);
+                if(title.length<1){
+                    logger.error("题目没找到!")
+                    break;
+                }
                 let answerBtn = topicsData.find(title);
                 logger.debug("answer ="+answerBtn);
                 if(answerBtn){
@@ -123,56 +132,65 @@ var run = function*(activityId,phoneNumber,fileDir) {
         };
         logger.info("答题主流程,返回结果: %s",result);
         //todo:这里需要把验证码发送到外部系统，然后监听回发的结果
+        logger.info("正在等待验证码...");
         //验证码截图
         let clientRect = yield nightmare
             .wait(1000)
+            .wait(".mugine_class_1043")
             .getRect(".mugine_class_1043");
         logger.info("获取到验证码区域为: %s",JSON.stringify(clientRect));
-        let pngDir = path.join(fileDir,"/validCode.png");
+        let pngDir = path.join(fileDir,`/validCode-${dateFormat(new Date(),"yyyy-mm-dd'T'HH-MM-ss")}.png`);
         logger.info("准备验证码截图到: %s",pngDir);
         yield nightmare.screenshot(pngDir,clientRect);
         
-    
-        let validResult = ""; //获取到的验证码
-        let validCodeWaitStart = new Date();//开始等验证码输入的时间(方便监控看出验证码过期情况)
-        let dotCount = 1;
-    
-    
-        //模拟从远端获取验证码
-        setTimeout(function () {
-            logger.info("模拟15s从远端获取到1个验证码");
-            validResult="1234";
-            // validResult = yield co.wrap(function *(valideCode) {
-            //     yield nightmare
-            //         .focus(".mugine_class_1042")
-            //         .wait(1000)
-            //         .type(".mugine_class_1042",valideCode)
-            //
-            //         .focus(".mugine_class_1045")//结束phantom-limb模式，方便人工手动纠正问题
-            //         .wait(500)
-            //         .keypress(27);
-            //
-            //     logger.info(`验证码${valideCode}输入完毕`);
-            //     return true;
-            //
-            // })("1234");
-        },15000);
+        logger.info(`准备对验证码图片:${pngDir} 进行base64...`);
+        let buf = fs.readFileSync(pngDir);
+        let base64 = buf.toString("base64");
         
-        //等待验证码输入完毕
-        while(!validResult){
-            logger.info(`等待输入验证码${new Array(dotCount=++dotCount%8).join(".")},已经等待了${(new Date()-validCodeWaitStart) /1000}秒`);
-            yield sleep(3000);
-        }
+    
+        let validResult = yield wsClient.send(msg.getValidateCode,base64); //获取到的验证码
+    
+        logger.info(`得到验证码图片:${pngDir} 的答案:${validResult}`);
+        // let validResult = ""; //获取到的验证码
+        // let validCodeWaitStart = new Date();//开始等验证码输入的时间(方便监控看出验证码过期情况)
+        // let dotCount = 1;
+        //
+        //
+        // // //模拟从远端获取验证码
+        // // setTimeout(function () {
+        // //     logger.info("模拟15s从远端获取到1个验证码");
+        // //     validResult="1234";
+        // //     // validResult = yield co.wrap(function *(valideCode) {
+        // //     //     yield nightmare
+        // //     //         .focus(".mugine_class_1042")
+        // //     //         .wait(1000)
+        // //     //         .type(".mugine_class_1042",valideCode)
+        // //     //
+        // //     //         .focus(".mugine_class_1045")//结束phantom-limb模式，方便人工手动纠正问题
+        // //     //         .wait(500)
+        // //     //         .keypress(27);
+        // //     //
+        // //     //     logger.info(`验证码${valideCode}输入完毕`);
+        // //     //     return true;
+        // //     //
+        // //     // })("1234");
+        // // },15000);
+        // //
+        // // //等待验证码输入完毕
+        // // while(!validResult){
+        // //     logger.info(`等待输入验证码${new Array(dotCount=++dotCount%8).join(".")},已经等待了${(new Date()-validCodeWaitStart) /1000}秒`);
+        // //     yield sleep(3000);
+        // // }
         yield nightmare
             .focus(".mugine_class_1042")
             .wait(1000)
             .type(".mugine_class_1042",validResult);
 
         logger.info(`验证码${validResult}输入完毕`);
-        // yield nightmare.end();
+        yield nightmare.end();
         
     }catch (e){
-        logger.error("出现错误:%s",e);
+        logger.error("出现错误:%s",e.stack);
     }
 };
 
@@ -189,7 +207,7 @@ module.exports={
             logger.info("插件运行结束，输出结果:"+result);
             onFinish && onFinish(true,result);
         }, function(err) {
-            logger.error(err);
+            logger.error(err.stack);
             onFinish && onFinish(false,err);
         });
     }

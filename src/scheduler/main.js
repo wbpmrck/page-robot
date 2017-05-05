@@ -12,6 +12,9 @@ const koa = require('koa'),
     serve = require('koa-static');
 const session = require('koa-session2');
 
+const io = require('socket.io')();
+const ws = require('./websocket/server');
+
 /* ---------------------------------
  错误处理
  ---------------------------------*/
@@ -75,40 +78,7 @@ app.use(serve(path.join(__dirname,config.scheduler.template.path),{defer:true}))
 
 if (!module.parent) app.listen(config.scheduler.port);
 
-console.log(`服务已启动，端口:[${config.scheduler.port}]`);
+logger.info(`http 服务已启动，端口:[${config.scheduler.port}]`);
 
-
-
-
-
-//todo:下面全部是启动一个worker的代码，应该放到某一个controller下面去
-// var [,,activityRecordId,activityId,pluginType,phoneNumber ]= process.argv;
-//
-// logger.info(`活动编号:[${activityId}],记录编号:[${activityRecordId}],插件类型:[${pluginType}],手机号:${phoneNumber}`);
-//
-// logger.info("准备form子进程，使用pm2启动worker...");
-// //通过pm2启动 worker
-// var subProc = spawn("pm2",`start main.js --name 活动:${pluginType}>${activityRecordId} --no-autorestart -- ${activityRecordId} ${activityId} ${pluginType} ${phoneNumber}`.split(" "),{cwd:path.join(__dirname,"../worker/")});
-//
-//
-//
-// //子进程的标准输出
-// subProc.stdout.on('data', (data) => {
-//     logger.debug(`worker.stdout: ${data}`);
-// });
-// //子进程的错误
-// subProc.stderr.on('data', (data) => {
-//     logger.error(`worker.stderr: ${data}`);
-// });
-// //子进程的关闭
-// subProc.on('close', (code) => {
-//     logger.info(`worker.close:child process exited with code ${code}`);
-// });
-// //子进程 启动出错
-// subProc.on('error', (err) => {
-//     logger.error(`worker.error: ${err}`);
-// });
-
-// setInterval(function () {
-//     logger.info("scheduler is running...")
-// },60000);
+logger.info(`准备启动websocket 服务`);
+ws.run(io);
