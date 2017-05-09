@@ -4,13 +4,60 @@
 const spawn = require('child_process').spawn;
 const logger = require('../../log/logger');
 const path = require('path');
-function Worker(id,proc){
+var {keys, values, entries} = Object;
+/**
+ * 类型：验证码记录条目
+ * @param activityRecordId
+ * @param base64
+ * @constructor
+ */
+function ValideCode(activityId,activityRecordId,base64,notifyFn){
+    this.id = undefined;//id 等到插入数据库之后，接口返回
+    this.activityId = activityId; //活动id
+    this.activityRecordId = activityRecordId; //活动记录id
+    this.status = 0; //0未打码 1已打码 待核实 2核实成功 3核实失败
+    this.base64  = base64;//待代码图片的base64
+    this.result = "";//打码员返回的答案
+    this.operator = ""; //打码员Id
+    this.notifyFn = notifyFn; //用于通知worker的回调函数
+}
+/**
+ * 接收答案，并通知回调
+ * @param result
+ */
+ValideCode.prototype.acceptResult = function (result) {
+    this.result = result;
+    
+    this.notifyFn && this.notifyFn(result);
+}
+
+/**
+ * 类型:worker对象
+ * @param id
+ * @param proc
+ * @constructor
+ */
+function Worker(activityId,id,proc){
     var self = this;
     
-    self.id = id;
+    self.activityId = activityId;
+    self.id = id; //worker的id其实就是活动参与记录id
     self.proc = proc;
-    self.data = {}; //进程相关的业务数据
+    self.waitedValidCode = {}; //进程相关的等待处理的验证码记录 ，key:valideCodeId ,value:{ValideCode}
     self.ws =  undefined; //ws链接需要等待worker主动链接上报
+}
+/**
+ *
+ * 将某次验证码记录保存到worker对象里面
+ * @param base64
+ * @param valideCodeId
+ * @param fn
+ * @returns {ValideCode}
+ */
+Worker.prototype.saveValidCodeCallback = function (base64,valideCodeId,fn) {
+    let v = new ValideCode(this.activityId,this.id,base64,fn);
+    this.waitedValidCode[valideCodeId]= v;
+    return v;
 }
 
 module.exports = {
@@ -48,7 +95,8 @@ module.exports = {
             logger.error("已经存在这个Worker:%s",id);
         }else{
             //通过pm2启动 worker
-            var subProc = spawn("pm2",`start main.js --name ${id} --no-autorestart -- ${id} ${activityRecordId} ${activityId} ${pluginType} ${phoneNumber}`.split(" "),{cwd:path.join(__dirname,"../../worker/")});
+            // var subProc = spawn("pm2",`start main.js --name ${id} --no-autorestart -- ${id} ${activityRecordId} ${activityId} ${pluginType} ${phoneNumber}`.split(" "),{cwd:path.join(__dirname,"../../worker/")});
+            var subProc = spawn("node",`main.js ${id} ${activityRecordId} ${activityId} ${pluginType} ${phoneNumber} >${id}.log &`.split(" "),{cwd:path.join(__dirname,"../../worker/")});
 
             //子进程的标准输出
             subProc.stdout.on('data', (data) => {
@@ -69,7 +117,7 @@ module.exports = {
                 this.workerDispose(id);
             });
             //写入数据集合
-            let w = new Worker(id,subProc);
+            let w = new Worker(activityId,id,subProc);
             this.workers[id] = w;
             return w;
         }
@@ -90,5 +138,38 @@ module.exports = {
             return true;
         }
         return false;
+    },
+    /**
+     * 获取所有worker内部的待处理的验证码
+     * @returns {Array}
+     */
+    getAllValidCodes:function () {
+        let _result =[];
+        let _workers = this.workers;
+        for (let [_, w] of entries(_workers)) {
+            let _codes = w.waitedValidCode;
+            for (let [_, value] of entries(_codes)) {
+                _result.push(value);
+            }
+        }
+        return _result;
+    },
+    /**
+     * 根据指定id获取验证码对象
+     * @returns {Array}
+     */
+    getValidCode:function (codeId) {
+        let _workers = this.workers;
+        for (let [_, w] of entries(_workers)) {
+             let _codes = w.waitedValidCode;
+             for (let [key, value] of entries(_codes)) {
+                 logger.debug(`getValidCode:key=${key}`)
+                 if(key === codeId){
+                     return  value;
+                 }
+             }
+             
+        }
+     return undefined;
     }
 }

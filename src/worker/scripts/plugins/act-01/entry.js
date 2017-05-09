@@ -148,6 +148,8 @@ var run = function*(activityId,phoneNumber,fileDir) {
         let base64 = buf.toString("base64");
         
     
+        // let valideCodeId = pngDir; //用图片路径作为验证码唯一标识
+        // let validResult = yield wsClient.send(msg.getValidateCode,valideCodeId,base64); //获取到的验证码
         let validResult = yield wsClient.send(msg.getValidateCode,base64); //获取到的验证码
     
         logger.info(`得到验证码图片:${pngDir} 的答案:${validResult}`);
@@ -186,7 +188,9 @@ var run = function*(activityId,phoneNumber,fileDir) {
             .wait(1000)
             .type(".mugine_class_1042",validResult);
 
-        logger.info(`验证码${validResult}输入完毕`);
+        logger.info(`验证码答案:[${validResult}]输入完毕`);
+        yield nightmare
+            .wait(3000);
         yield nightmare.end();
         
     }catch (e){

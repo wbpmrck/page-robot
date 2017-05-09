@@ -69,7 +69,7 @@ module.exports=map; //需要把map作为exports
         - body:{activityRecordId,activityId,pluginType,phoneNumber}
     - 输出:
         - 样例:
-        ```
+        ```json
         {
           "code": "0000",
           "desc": "成功",

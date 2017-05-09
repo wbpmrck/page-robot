@@ -14,7 +14,9 @@ module.exports ={
         ok:"0000"
     },
     msg:{
-        "reg":"reg", //注册消息
-        "getValidateCode":"getValidCode", //注册消息
+        "reg":"reg", //注册 worker,admin->scheduler
+        "getValidateCode":"getValidCode", //获取验证码答案请求 worker->scheduler
+        "vCodePush":"vCodePush", //验证码推送 scheduler->admin
+        "vCodeSubmit":"vCodeSubmit", //验证码答案提交 admin->scheduler
     }
 };

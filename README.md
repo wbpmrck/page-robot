@@ -74,6 +74,10 @@ module.exports ={
             * scheduler的底层设施
         * interceptors:
             * 拦截器
+        * service:
+            * 后台业务逻辑服务
+
+            > 当前版本，还没有使用mysql进行数据CRUD,里面主要存放一些mock数据服务
         * routes:
             * 路由设置
         * store:
@@ -94,6 +98,8 @@ module.exports ={
     * 存放常用的各种启动脚本
 * data[recordId]:
     * 每个活动参与记录下保存的临时文件信息
+* logs:
+    * 每个活动参与记录下的日志文件
 
 
 # docs

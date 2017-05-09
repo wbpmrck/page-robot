@@ -7,7 +7,7 @@
 
 const path = require('path');
 const util = require('util');
-console.log(`process.env=${util.inspect(process.env)}`);
+// console.log(`process.env=${util.inspect(process.env)}`);
 //设置配置文件路径
 process.env.NODE_CONFIG_DIR=path.join(__dirname,"../config");
 

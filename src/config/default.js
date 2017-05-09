@@ -6,6 +6,7 @@ module.exports ={
     worker:{
       wsTimeout:30 //worker调用websocket通知scheduler的时候，如果ws链接断开，重发的等待时间(单位s)
     },
+    
     scheduler:{
         domainPrefix:"", //动态网站部署的一级目录名，为""表示端口根目录
         port:1234,//监听的http端口，通过此端口可以接受对外服务
