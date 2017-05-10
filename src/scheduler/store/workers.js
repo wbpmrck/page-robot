@@ -28,7 +28,11 @@ function ValideCode(activityId,activityRecordId,base64,notifyFn){
 ValideCode.prototype.acceptResult = function (result) {
     this.result = result;
     
-    this.notifyFn && this.notifyFn(result);
+    // this.notifyFn && this.notifyFn(result);
+    this.notifyFn && this.notifyFn({
+        validResult:result,
+        validId:this.id
+    });
 }
 
 /**
@@ -58,6 +62,13 @@ Worker.prototype.saveValidCodeCallback = function (base64,valideCodeId,fn) {
     let v = new ValideCode(this.activityId,this.id,base64,fn);
     this.waitedValidCode[valideCodeId]= v;
     return v;
+}
+/**
+ * 删除内存中的vcode记录
+ * @param valideCodeId
+ */
+Worker.prototype.removeVCode = function (valideCodeId) {
+    delete this.waitedValidCode[valideCodeId];
 }
 
 module.exports = {
@@ -136,6 +147,11 @@ module.exports = {
         if(worker){
             worker.ws = wsClient;
             return true;
+        }else{
+            //todo:为了方便单独调试插件，允许不通过调度来启动worker,而是通过
+            //写入数据集合
+            let w = new Worker("",id,undefined);
+            this.workers[id] = w;
         }
         return false;
     },

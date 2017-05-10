@@ -15,8 +15,15 @@ module.exports ={
     },
     msg:{
         "reg":"reg", //注册 worker,admin->scheduler
+        
         "getValidateCode":"getValidCode", //获取验证码答案请求 worker->scheduler
+        "writeVCodeResult":"writeVCodeResult", //反馈验证码答案结果 worker->scheduler
+        "activityRecordEnd":"activityRecordEnd", //反馈活动参加记录完成结果 worker->scheduler
+        
+        
         "vCodePush":"vCodePush", //验证码推送 scheduler->admin
+        
+        
         "vCodeSubmit":"vCodeSubmit", //验证码答案提交 admin->scheduler
     }
 };

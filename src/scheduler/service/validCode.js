@@ -24,6 +24,26 @@ module.exports={
       }) ;
       logger.debug(`result =${JSON.stringify(result)}`);
       return result.data;
+  },
+    /**
+     * 业务接口，记录验证码识别结果
+     * @param vcodeId：验证码Id
+     * @param vresult:识别成功(bool)
+     * @returns {Promise.<*>}
+     */
+  async saveValidateResult({vcodeId,vresult}){
+      logger.debug(`准备调用:saveValidateResult，vcodeId=${vcodeId},vresult=${vresult}`);
+    
+      // todo:后续改为调用道富的接口
+      let  result = await new Promise((resolve,reject)=>{
+          logger.debug(`模拟接口发出...3s返回`);
+          setTimeout(()=>{
+              resolve({
+                  code:"0000"
+              })
+          },3000)
+      }) ;
+      return result;
   }
 };
 

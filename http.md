@@ -67,6 +67,8 @@ module.exports=map; //需要把map作为exports
 - 提交单个号码充值请求
     - 输入:
         - body:{activityRecordId,activityId,pluginType,phoneNumber}
+    - 逻辑:
+        - 该接口会调用后台http接口，更新活动参加记录的状态=>`"充值中"`
     - 输出:
         - 样例:
         ```json

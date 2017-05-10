@@ -22,9 +22,9 @@ map.set(
     async (ctx,next) =>{
         try{
             // let {activityRecordId,activityId,pluginType,phoneNumber}=ctx.request.body;
-            let {activityId,pluginType,phoneNumber}=ctx.request.body;
+            let {activityRecordId,activityId,pluginType,phoneNumber}=ctx.request.body;
             
-            let activityRecordId = await activityService.beginActivity({activityId,pluginType,phoneNumber});
+            let result = await activityService.beginActivity({activityRecordId,activityId,pluginType,phoneNumber});
             
             
             //通过pm2启动一个worker,并在内存中保留其信息

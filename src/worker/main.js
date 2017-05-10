@@ -62,7 +62,7 @@ wsClient.init(id,()=>{
     var plugin = require(pluginDir);
     logger.info(`准备执行插件入口main方法`);
     
-    plugin && plugin.main(activityId,phoneNumber,tempDataDir,function (success, result) {
+    plugin && plugin.main(activityRecordId,activityId,phoneNumber,tempDataDir,function (success, result) {
         logger.info(`活动参与结果:${success},返回信息:${result}`);
         wsClient.quit();
     });

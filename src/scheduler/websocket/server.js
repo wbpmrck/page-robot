@@ -8,6 +8,7 @@ const config = require('config');
 const wokers = require('../store/workers');
 
 const validCodeService = require("../service/validCode");
+const activityService = require("../service/activity");
 //ws客户端角色
 var {clientRole,respCodes,msg} = require("./consts");
 
@@ -44,8 +45,7 @@ module.exports={
             // 消息处理：获取验证码答案请求  worker->scheduler
             // client.on(msg.getValidateCode,(valideCodeId,pngBase64,reply)=>{
             client.on(msg.getValidateCode,(pngBase64,reply)=>{
-                // logger.debug(`收到图片请求,valideCodeId:${valideCodeId},base64=4${pngBase64}`);
-                logger.debug(`收到图片请求,base64=4${pngBase64}`);
+                // logger.debug(`收到图片请求,base64=${pngBase64}`);
                 let w = wokers.workers[client._workerId];
                 if(w){
                     
@@ -64,6 +64,44 @@ module.exports={
                     logger.error(`寻找worker:${client._workerId}错误，没找到!`)
                 }
                 // reply("1234"); //模拟返回答案
+            });
+            
+            //反馈验证码答案 worker => scheduler
+            client.on(msg.writeVCodeResult,(validId,vresult,reply)=>{
+                logger.debug(`收到 writeVCodeResult,validId=${validId},vresult=${vresult}`);
+                let w = wokers.workers[client._workerId];
+                if(w){
+                    
+                    logger.debug(`准备调用service,记录验证码结果`);
+                    validCodeService.saveValidateResult({vcodeId:validId,vresult:vresult}).then(function (ret) {
+                        logger.debug(`调用service,记录验证码结果，ret.code=${ret.code}`);
+                        //删除内存中的验证码记录
+                        w.removeVCode(validId);
+                        reply &&reply(true)
+                    }).catch(function (err) {
+                        logger.error(`调用service,记录验证码结果:${err.stack}`);
+                    });
+                }else{
+                    logger.error(`寻找worker:${client._workerId}错误，没找到!`)
+                }
+            });
+            
+            //反馈参与记录结果 worker => scheduler
+            client.on(msg.activityRecordEnd,(activityRecordId,successFlag,failedReason,reply)=>{
+                logger.debug(`收到 activityRecordEnd,activityRecordId=${activityRecordId},successFlag=${successFlag},failedReason=${failedReason}`);
+                let w = wokers.workers[client._workerId];
+                if(w){
+                    
+                    logger.debug(`准备调用service,反馈参与记录结果`);
+                    activityService.endActivityRecord({activityRecordId,successFlag,failedReason}).then(function (ret) {
+                        logger.debug(`调用service,反馈参与记录结果，ret.code=${ret.code}`);
+                        reply &&reply(true)
+                    }).catch(function (err) {
+                        logger.error(`调用service,反馈参与记录结果:${err.stack}`);
+                    });
+                }else{
+                    logger.error(`寻找worker:${client._workerId}错误，没找到!`)
+                }
             });
             
             // 消息处理：验证码答案提交  admin->scheduler

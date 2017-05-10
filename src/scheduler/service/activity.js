@@ -24,6 +24,21 @@ module.exports={
       }) ;
       logger.debug(`result =${JSON.stringify(result)}`);
       return result.data;
+  },
+  async endActivityRecord({activityRecordId,successFlag,failedReason}){
+      logger.debug(`准备调用:endActivityRecord`);
+    
+      logger.debug(`模拟调用接口`);
+      // todo:后续改为调用道富的接口
+      let  result = await new Promise((resolve,reject)=>{
+          logger.debug(`模拟接口发出...3s返回`);
+          setTimeout(()=>{
+              resolve({
+                  code:"0000"
+              })
+          },3000)
+      }) ;
+      return result;
   }
 };
 
