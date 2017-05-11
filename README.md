@@ -88,8 +88,10 @@ module.exports ={
     * 工作程序，负责启动phantomjs进程，进行实际的工作
 * src/worker/scripts/plugins:
     * 插件，当worker启动之后，需要根据当前的目标url不同，加载不同的插件进行逻辑处理
-* src/utils:
+* src/framework:
     * 存放项目内通用的一些辅助类
+* src/utils:
+    * 存放技术层面通用的一些辅助类
 * src/libs:
     * 存放第三方的一些通用库
 * src/log:

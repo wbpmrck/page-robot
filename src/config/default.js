@@ -5,7 +5,10 @@
 module.exports ={
     worker:{
         vcode_retry_times:10, //如果验证码不对，则允许一个worker重试验证码的最大次数
-      wsTimeout:30 //worker调用websocket通知scheduler的时候，如果ws链接断开，重发的等待时间(单位s)
+        wsTimeout:30 //worker调用websocket通知scheduler的时候，如果ws链接断开，重发的等待时间(单位s)
+    },
+    httpInterface:{
+        prefix:"http://192.168.57.84:8099/fdp-active-app"
     },
     
     scheduler:{

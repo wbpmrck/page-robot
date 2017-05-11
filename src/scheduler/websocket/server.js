@@ -50,18 +50,26 @@ module.exports={
                 if(w){
                     
                     logger.debug(`准备调用service,新增打码记录，并拿到Id`);
-                    validCodeService.newValidateCodeRecord({activityId:w.activityId,activityRecordId:w.id,pngBase64}).then(function (valideCodeId) {
-                        let vCodeRecord = w.saveValidCodeCallback(pngBase64,valideCodeId,reply); //暂存回调函数，用于后续收到admin的打码记录之后回调
+                    validCodeService.newValidateCodeRecord({activityId:w.activityId,activityRecordId:w.id,base64:pngBase64}).then(function (resp) {
+                        if(resp && resp.code =='0000'){
+                            let valideCodeId = resp.content.id;
+                            let vCodeRecord = w.saveValidCodeCallback(pngBase64,valideCodeId,reply); //暂存回调函数，用于后续收到admin的打码记录之后回调
     
-                        vCodeRecord.id = valideCodeId;
-                        logger.debug(`调用service,新增打码记录，拿到Id=${valideCodeId}`);
-                        //推送消息给所有的admin clients
-                        io.to(clientRole.admin).emit(msg.vCodePush,[vCodeRecord]);//新验证码推送 scheduler->admin
+                            vCodeRecord.id = valideCodeId;
+                            logger.debug(`调用service,新增打码记录，拿到Id=${valideCodeId}`);
+                            //推送消息给所有的admin clients
+                            io.to(clientRole.admin).emit(msg.vCodePush,[vCodeRecord]);//新验证码推送 scheduler->admin
+                        }else{
+                            logger.error(`调用service,新增打码记录错误:${resp.code}:${resp.desc}`);
+                            reply("err");//返回错误的验证码给worker，使得流程继续
+                        }
                     }).catch(function (err) {
                         logger.error(`调用service,新增打码记录错误:${err.stack}`);
+                        reply("err");//返回错误的验证码给worker，使得流程继续
                     });
                 }else{
-                    logger.error(`寻找worker:${client._workerId}错误，没找到!`)
+                    logger.error(`寻找worker:${client._workerId}错误，没找到!`);
+                    reply("err");//返回错误的验证码给worker，使得流程继续
                 }
                 // reply("1234"); //模拟返回答案
             });
@@ -73,8 +81,8 @@ module.exports={
                 if(w){
                     
                     logger.debug(`准备调用service,记录验证码结果`);
-                    validCodeService.saveValidateResult({vcodeId:validId,vresult:vresult}).then(function (ret) {
-                        logger.debug(`调用service,记录验证码结果，ret.code=${ret.code}`);
+                    validCodeService.saveValidateResult({vcodeId:validId,vresult:vresult}).then(function (resp) {
+                        logger.debug(`调用service,记录验证码结果，ret.code=${resp.code}`);
                         //删除内存中的验证码记录
                         w.removeVCode(validId);
                         reply &&reply(true)

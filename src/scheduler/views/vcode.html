@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>vcode page</title>
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="./libs/iview/styles/iview.css">
+    <script src="./libs/vue.js"></script>
+    <script src="./libs/iview/iview.js"></script>
+</head>
+<body>
+
+<div id="app">
+    <i-button @click="show">Click me!</i-button>
+    <Modal v-model="visible" title="Welcome">欢迎使用 iView</Modal>
+</div>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            visible: false
+        },
+        methods: {
+            show: function () {
+                this.visible = true;
+            }
+        }
+    })
+</script>
+
+
+</body>
+</html>

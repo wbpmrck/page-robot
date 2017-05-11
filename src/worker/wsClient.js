@@ -6,6 +6,7 @@ const logger = require("../log/logger");
 var {clientRole,respCodes,msg} = require("../scheduler/websocket/consts");
 
 var socket; //因为worker是通过多进程方式启动的，所以一个进程里只有一个websocket链接
+var inited = false;
 module.exports={
     quit(){
       socket && socket.disconnect();
@@ -16,10 +17,14 @@ module.exports={
     
       socket = require('socket.io-client')(`http://localhost:${config.scheduler.ws.port}`);
       socket.on('connect', function(){
-            logger.info("ws链接成功,准备进行注册");
+            logger.info("ws链接成功");
+            logger.info("准备进行注册");
             socket.emit(msg.reg,workerId,clientRole.worker,function onReply(rep){
                 logger.info(`收到调度对注册消息的反馈:${rep}`);
-                onSuccess && onSuccess(); //回调
+                if(!inited){
+                    inited = true;
+                    onSuccess && onSuccess(); //回调
+                }
             });
       });
       socket.on('disconnect', function(){

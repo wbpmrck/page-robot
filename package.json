@@ -24,6 +24,7 @@
     "config": "^1.12.0",
     "dateformat": "^2.0.0",
     "glob": "^7.1.1",
+    "iview": "^2.0.0-rc.12",
     "koa": "^2.2.0",
     "koa-bodyparser": "^4.2.0",
     "koa-orm": "^2.0.0",
@@ -33,6 +34,8 @@
     "koa-views": "^6.0.2",
     "mysql": "^2.11.1",
     "nightmare": "^2.10.0",
+    "request": "^2.81.0",
+    "request-promise-native": "^1.0.4",
     "sequelize": "^3.27.0",
     "socket.io": "^1.7.3"
   }

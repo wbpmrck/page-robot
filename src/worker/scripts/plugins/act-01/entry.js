@@ -72,7 +72,19 @@ var _afterSeeValidCode = function *(activityRecordId,activityId,phoneNumber,file
     // let pngDir = path.join(fileDir,`/validCode-${dateFormat(new Date(),"yyyy-mm-dd'T'HH-MM-ss")}.png`);
     let pngDir = path.join(fileDir,`/validCode-${submit_count}.png`);
     logger.info("准备验证码截图到: %s",pngDir);
+    
+    yield nightmare
+        .focus(".mugine_class_1045")// 结束phantom-limb模式，方便截图
+        .wait(500)
+        .keypress(27)
+        .wait(500);
+    
     yield nightmare.screenshot(pngDir,clientRect);
+    
+    yield nightmare
+        .focus(".mugine_class_1045")// 开启phantom-limb模式，方便后续操作
+        .wait(500)
+        .keypress(27);
     
     logger.info(`准备对验证码图片:${pngDir} 进行base64...`);
     let buf = fs.readFileSync(pngDir);
@@ -260,7 +272,7 @@ var run = function*(activityRecordId,activityId,phoneNumber,fileDir) {
             }
         }
         
-        //todo:重试结束，反馈最终活动参加记录结果给调度
+        //重试结束，反馈最终活动参加记录结果给调度
         let successFlag = resultCode === 'success';
         //反馈参与记录结果(记录id,成功标记,失败原因)
         let endRet= yield wsClient.send(msg.activityRecordEnd,activityRecordId,successFlag,successFlag?"":resultCode);
@@ -269,11 +281,11 @@ var run = function*(activityRecordId,activityId,phoneNumber,fileDir) {
         //结束
         yield nightmare
             .wait(3000)
-            .focus(".mugine_class_1045")// todo:结束phantom-limb模式，方便人工手动纠正问题
+            .focus(".mugine_class_1045")// 结束phantom-limb模式，方便人工手动纠正问题
             .wait(500)
             .keypress(27);
         
-        // yield nightmare.end();  //todo:需要自动退出机器人进程，结束
+        yield nightmare.end();  //todo:需要自动退出机器人进程，结束
         
     }catch (e){
         logger.error("出现错误:%s",e.stack);

@@ -4,41 +4,45 @@
 
 
 const logger = require('../../log/logger');
+var http = require("../../framework/httpHelper");
+var recordStatus = require("../../consts/activityRecordStatus");
+
 
 module.exports={
-  async beginActivity({activityId,pluginType,phoneNumber}){
-      logger.debug(`准备调用:beginActivity`);
+  async beginActivity({activityRecordId,activityId,pluginType,phoneNumber}){
     
-      logger.debug(`模拟调用接口之后，返回活动参加记录id`);
-      // todo:这里先用延迟模拟调用http业务接口，后续改为调用道富的接口
-      let  result = await new Promise((resolve,reject)=>{
-          logger.debug(`模拟接口发出...3s返回`);
-          setTimeout(()=>{
-              var id = (+new Date()).toString();
-              logger.debug(`生成id:${id}`);
-              resolve({
-                  returnCode:"0000",
-                  data:id
-              })
-          },3000)
-      }) ;
-      logger.debug(`result =${JSON.stringify(result)}`);
-      return result.data;
+      //:这里先用延迟模拟调用http业务接口，后续改为调用道富的接口
+      // let  result = await new Promise((resolve,reject)=>{
+      //     logger.debug(`模拟接口发出...3s返回`);
+      //     setTimeout(()=>{
+      //         var id = (+new Date()).toString();
+      //         logger.debug(`生成id:${id}`);
+      //         resolve({
+      //             returnCode:"0000",
+      //             data:id
+      //         })
+      //     },3000)
+      // }) ;
+      
+      let {resp,err} = await http.post("/part/active/update",{id:parseInt(activityRecordId),status:recordStatus.ORDERING,failReason:"",failDesc:""})
+      return resp;
   },
-  async endActivityRecord({activityRecordId,successFlag,failedReason}){
-      logger.debug(`准备调用:endActivityRecord`);
+  async endActivityRecord({activityRecordId,successFlag,failedReason,failedDesc}){
+      // logger.debug(`准备调用:endActivityRecord`);
+      //
+      // logger.debug(`模拟调用接口`);
+      // 后续改为调用道富的接口
+      // let  result = await new Promise((resolve,reject)=>{
+      //     logger.debug(`模拟接口发出...3s返回`);
+      //     setTimeout(()=>{
+      //         resolve({
+      //             code:"0000"
+      //         })
+      //     },3000)
+      // }) ;
     
-      logger.debug(`模拟调用接口`);
-      // todo:后续改为调用道富的接口
-      let  result = await new Promise((resolve,reject)=>{
-          logger.debug(`模拟接口发出...3s返回`);
-          setTimeout(()=>{
-              resolve({
-                  code:"0000"
-              })
-          },3000)
-      }) ;
-      return result;
+      let {resp,err} = await http.post("/part/active/update",{id:parseInt(activityRecordId),status:successFlag?recordStatus.ORDER_SUCCESS:recordStatus.ORDER_FAILED,failReason:failedReason,failDesc:failedDesc})
+      return resp;
   }
 };
 

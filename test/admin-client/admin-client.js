@@ -9,7 +9,7 @@ var codes =[];
 
 function appendCodes(vcodes) {
     codes = codes.concat(vcodes);
-    console.log("all codes="+JSON.stringify(codes));
+    // console.log("all codes="+JSON.stringify(codes));
 }
 
 socket.on('connect', function(){
@@ -33,10 +33,12 @@ setInterval(function () {
     // console.log("准备检查是否有可模拟回复的验证码");
     if(codes.length>0){
         //当打码员输入验证码，点击提交按钮的时候
-        socket.emit("vCodeSubmit",codes[0].id,parseInt(Math.random()*10000),function (ok){
+        let answer = parseInt(Math.random()*10000);
+        console.log(`准备回复答案=${answer}`);
+        socket.emit("vCodeSubmit",codes[0].id,answer,function (ok){
             console.log(`收到scheduler对id=${codes[0].id}的回复:${ok}`);
             if(ok){
-                codes.splice(0)
+                codes.splice(0,1)
             }
         });
     }

@@ -148,7 +148,7 @@ module.exports = {
             worker.ws = wsClient;
             return true;
         }else{
-            //todo:为了方便单独调试插件，允许不通过调度来启动worker,而是通过
+            //todo:(以后删除)为了方便单独调试插件，允许不通过调度来启动worker,而是通过ws注册消息自动注册worker.
             //写入数据集合
             let w = new Worker("",id,undefined);
             this.workers[id] = w;
@@ -180,7 +180,7 @@ module.exports = {
              let _codes = w.waitedValidCode;
              for (let [key, value] of entries(_codes)) {
                  logger.debug(`getValidCode:key=${key}`)
-                 if(key === codeId){
+                 if(key == codeId){
                      return  value;
                  }
              }

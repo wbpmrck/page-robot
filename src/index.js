@@ -47,7 +47,7 @@ app.use(require('./app/interceptors/logger'));
 app.use(require('./app/interceptors/cross-origin'));
 // 5.session middleware
 app.keys = ['im a newer secret', 'i like turtle'];
-app.use(session(config.session, app));
+app.use(session(config.scheduler.session, app));
 
 // 6.登录鉴权
 app.use(require('./app/interceptors/auth'));
@@ -56,7 +56,7 @@ app.use(require('./app/interceptors/auth'));
 app.use(orm.middleware);
 
 // 8.initialize render helper
-app.use(views(config.template.path, config.template.options));
+app.use(views(config.scheduler.template.path, config.scheduler.template.options));
 
 
 /* ---------------------------------
@@ -66,7 +66,7 @@ app.use(views(config.template.path, config.template.options));
 require('./app/routes').auto(app);
 
 // 9.static file server
-app.use(serve(__dirname + '/app/views',{defer:true}));
+app.use(serve(__dirname + '/scheduler/views',{defer:true}));
 
 
 

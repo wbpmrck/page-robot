@@ -62,6 +62,7 @@ module.exports={
      */
     success:function ({desc="",data=undefined},context) {
         if(context){
+            context.type = 'application/json';
             context.body = _makeResponse(returnCodeDiction.SUCCESS,desc,data);
             context.body.success=true;
         }else{
@@ -81,6 +82,7 @@ module.exports={
      */
     failed:function ({code=returnCodeDiction.SERVER_ERROR,desc="",data=undefined},context) {
         if(context){
+            context.type = 'application/json';
             context.body = _makeResponse(code,desc,data)
             context.body.success=false;
         }else{
