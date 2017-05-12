@@ -2,6 +2,7 @@
  * Created by kaicui on 17/5/2.
  */
 const spawn = require('child_process').spawn;
+const os = require("os");
 const logger = require('../../log/logger');
 const path = require('path');
 var {keys, values, entries} = Object;
@@ -107,8 +108,15 @@ module.exports = {
         }else{
             //通过pm2启动 worker
             // var subProc = spawn("pm2",`start main.js --name ${id} --no-autorestart -- ${id} ${activityRecordId} ${activityId} ${pluginType} ${phoneNumber}`.split(" "),{cwd:path.join(__dirname,"../../worker/")});
-            var subProc = spawn("node",`main.js ${id} ${activityRecordId} ${activityId} ${pluginType} ${phoneNumber} >${id}.log &`.split(" "),{cwd:path.join(__dirname,"../../worker/")});
-
+    
+            var subProc;
+            let osType = os.platform();
+            if(osType.toLowerCase() === 'linux'){
+                //xvfb-run -a --server-args="-screen 0 1280x1028x24 -ac +extension GLX +extension RANDR +render" node ../worker/main.js
+                subProc = spawn("xvfb-run",`-a --server-args="-screen 0 1280x1028x24 -ac +extension GLX +extension RANDR +render" node main.js ${id} ${activityRecordId} ${activityId} ${pluginType} ${phoneNumber}`.split(" "),{cwd:path.join(__dirname,"../../worker/")});
+            }else{
+                subProc = spawn("node",`main.js ${id} ${activityRecordId} ${activityId} ${pluginType} ${phoneNumber} >${id}.log &`.split(" "),{cwd:path.join(__dirname,"../../worker/")});
+            }
             //子进程的标准输出
             subProc.stdout.on('data', (data) => {
                 logger.debug(`worker.stdout: ${data}`);

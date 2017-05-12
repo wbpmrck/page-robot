@@ -15,13 +15,18 @@ the cd the project dir and execute:
 $ npm install
 ```
 
+> chinese user should use `cnpm` or taobao mirror speed up the process:
+```
+$ npm install --registry=https://registry.npm.taobao.org
+```
 
 # how to run
 
 goto `./src` directory,and execute command:
 
 ```
-$ ./run/scheduler.sh
+#"dev","test","prod" is env param,decide by your need
+$ ./run/scheduler.sh dev
 ```
 
 so the scheduler has boot up,which will listen to port `1234` to server http request,and `4567` port to serve websocket request.
@@ -102,6 +107,11 @@ module.exports ={
     * 每个活动参与记录下保存的临时文件信息
 * logs:
     * 每个活动参与记录下的日志文件
+* config:
+    * 配置信息
+    * 构建：
+        * 在构建的时候，会把profiles里的文件拷贝到这个目录
+        * 配置创建的时候会读取额外的properties，如果没有，则使用原本的(相当于local)
 
 
 # docs
